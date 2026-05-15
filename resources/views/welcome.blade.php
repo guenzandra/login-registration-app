@@ -42,8 +42,6 @@
             color: var(--text);
             overflow-x: hidden
         }
-
-        /* ── LAYOUT ── */
         .page {
             min-height: 100vh;
             display: grid;
@@ -61,7 +59,6 @@
             }
         }
 
-        /* ── LEFT PANEL ── */
         .panel-left {
             position: relative;
             overflow: hidden;
@@ -199,14 +196,12 @@
             pointer-events: none;
         }
 
-        /* ── FORM CARD ── */
         .form-card {
             position: relative;
             width: 100%;
             max-width: 420px;
         }
 
-        /* ── TABS ── */
         .tabs {
             display: flex;
             background: var(--surface);
@@ -244,7 +239,6 @@
             color: var(--text)
         }
 
-        /* ── FORM PANELS ── */
         .form-panel {
             display: none
         }
@@ -281,7 +275,6 @@
             line-height: 1.6;
         }
 
-        /* ── FIELDS ── */
         .field {
             margin-bottom: 1.1rem
         }
@@ -380,7 +373,6 @@
             color: var(--gold)
         }
 
-        /* ── STRENGTH BAR ── */
         .strength {
             margin-top: .5rem
         }
@@ -406,7 +398,6 @@
             font-weight: 500;
         }
 
-        /* ── CHECKBOX ── */
         .check-row {
             display: flex;
             align-items: flex-start;
@@ -435,7 +426,6 @@
             text-decoration: underline
         }
 
-        /* ── SUBMIT BUTTON ── */
         .btn-submit {
             width: 100%;
             padding: .9rem;
@@ -481,7 +471,6 @@
             transform: none
         }
 
-        /* ── SPINNER ── */
         .spinner {
             width: 16px;
             height: 16px;
@@ -492,7 +481,6 @@
             flex-shrink: 0;
         }
 
-        /* ── DIVIDER ── */
         .divider {
             display: flex;
             align-items: center;
@@ -512,7 +500,6 @@
             background: var(--border)
         }
 
-        /* ── SWITCH LINK ── */
         .switch-text {
             text-align: center;
             font-size: .84rem;
@@ -537,7 +524,6 @@
             text-decoration: underline
         }
 
-        /* ── TOAST ── */
         #toasts {
             position: fixed;
             top: 1.2rem;
@@ -689,7 +675,6 @@
 
     <div class="page">
 
-        <!-- ══ LEFT PANEL ══ -->
         <div class="panel-left">
             <div class="noise"></div>
             <div class="grid-overlay"></div>
@@ -716,7 +701,6 @@
             </div>
         </div>
 
-        <!-- ══ RIGHT PANEL ══ -->
         <div class="panel-right">
             <div class="form-card">
 
@@ -726,7 +710,6 @@
                     <button class="tab" role="tab" aria-selected="false" onclick="switchTab('register')">Register</button>
                 </div>
 
-                <!-- ── LOGIN FORM ── -->
                 <div class="form-panel active" id="panel-login">
                     <h2 class="form-heading">Welcome back</h2>
                     <p class="form-sub">Sign in to continue to your account.</p>
@@ -931,10 +914,8 @@
         </div>
     </div>
 
-    <!-- Toast container -->
     <div id="toasts" aria-live="polite"></div>
 
-    <!-- SVG icon defs for eye/eye-off used in togglePw -->
     <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
         <symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -947,7 +928,6 @@
     </svg>
 
     <script>
-        // ── Tab switching ────────────────────────────────────────────────
         function switchTab(name) {
             document.querySelectorAll('.tab').forEach((t, i) => {
                 const isActive = (i === 0 && name === 'login') || (i === 1 && name === 'register');
@@ -959,7 +939,6 @@
             clearAllErrors();
         }
 
-        // ── Error helpers ────────────────────────────────────────────────
         function clearAllErrors() {
             document.querySelectorAll('.field-err').forEach(e => e.classList.remove('show'));
             document.querySelectorAll('input').forEach(e => e.classList.remove('err'));
@@ -979,7 +958,6 @@
             if (er) er.classList.remove('show');
         }
 
-        // ── Password toggle ──────────────────────────────────────────────
         const eyeSVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
         const eyeOffSVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
 
@@ -990,7 +968,6 @@
             btn.innerHTML = hidden ? eyeOffSVG : eyeSVG;
         }
 
-        // ── Password strength ────────────────────────────────────────────
         function checkStrength(v) {
             const fill = document.getElementById('s-fill');
             const label = document.getElementById('s-label');
@@ -1038,7 +1015,6 @@
             label.style.color = l.c;
         }
 
-        // ── LOGIN - Redirect to admin/dashboard ──────────────────────────
         function submitLogin() {
             clearAllErrors();
             const email = document.getElementById('l-email').value.trim();
@@ -1068,7 +1044,6 @@
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
         }
 
-        // ── REGISTER - Show success then redirect to login ────────────────
         function submitRegister() {
             clearAllErrors();
             const name = document.getElementById('r-name').value.trim();
@@ -1104,7 +1079,6 @@
             setLoading('r-btn', true);
             setTimeout(() => {
                 setLoading('r-btn', false);
-                // Clear form
                 ['r-name', 'r-email', 'r-pw', 'r-confirm'].forEach(id => {
                     document.getElementById(id).value = ''
                 });
@@ -1114,14 +1088,12 @@
 
                 toast('success', 'Account created!', `Welcome aboard, ${name}! Your account is ready.`);
 
-                // Switch to login tab after 1 second
                 setTimeout(() => {
                     switchTab('login');
                 }, 1000);
             }, 1500);
         }
 
-        // ── Loading state ────────────────────────────────────────────────
         function setLoading(id, on) {
             const b = document.getElementById(id);
             if (on) {
@@ -1134,7 +1106,6 @@
             }
         }
 
-        // ── Toast ─────────────────────────────────────────────────────────
         let tc = 0;
         const icons = {
             success: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
