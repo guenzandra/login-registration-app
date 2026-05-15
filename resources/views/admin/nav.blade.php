@@ -19,7 +19,6 @@
   <div class="nav-group-label">Main</div>
 
   <a href="{{ route('admin.dashboard') }}" class="nav-link">
-    {{-- Dashboard grid icon --}}
     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"
       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -31,7 +30,6 @@
   </a>
 
   <a href="{{ route('admin.accounts') }}" class="nav-link">
-    {{-- Users icon --}}
     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"
       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="9" cy="7" r="4" />
@@ -45,7 +43,6 @@
   <div class="nav-group-label" style="margin-top:14px;">System</div>
 
   <a href="{{ route('admin.settings') }}" class="nav-link">
-    {{-- Settings cog icon --}}
     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"
       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="3" />
@@ -64,7 +61,6 @@
 
 <div class="sidebar-footer">
   <a href="{{ route('logout') }}" class="nav-link">
-    {{-- Logout icon --}}
     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"
       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -75,7 +71,6 @@
   </a>
 </div>
 
-{{-- TOPBAR --}}
 <div class="topbar-time">
   <span class="flag">🇵🇭</span>
   <span id="time"></span>
