@@ -36,7 +36,8 @@
             --r: 10px;
         }
 
-        html, body {
+        html,
+        body {
             min-height: 100%;
             font-family: 'Syne', sans-serif;
             background: var(--bg);
@@ -55,6 +56,7 @@
             .page {
                 grid-template-columns: 1fr
             }
+
             .panel-left {
                 display: none
             }
@@ -76,7 +78,7 @@
             position: absolute;
             inset: 0;
             background: radial-gradient(ellipse 70% 50% at 30% 20%, rgba(201, 168, 76, .13) 0%, transparent 65%),
-                        radial-gradient(ellipse 50% 60% at 80% 85%, rgba(201, 168, 76, .06) 0%, transparent 60%);
+                radial-gradient(ellipse 50% 60% at 80% 85%, rgba(201, 168, 76, .06) 0%, transparent 60%);
             pointer-events: none;
         }
 
@@ -92,7 +94,7 @@
             position: absolute;
             inset: 0;
             background-image: linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
+                linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
             background-size: 48px 48px;
             pointer-events: none;
         }
@@ -253,6 +255,7 @@
                 opacity: 0;
                 transform: translateY(10px)
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0)
@@ -327,7 +330,7 @@
             box-shadow: 0 0 0 3px rgba(201, 168, 76, .1);
         }
 
-        .input-wrap input:focus ~ .input-icon,
+        .input-wrap input:focus~.input-icon,
         .input-wrap:focus-within .input-icon {
             color: var(--gold)
         }
@@ -647,22 +650,33 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg) }
+            to {
+                transform: rotate(360deg)
+            }
         }
 
         @keyframes shrink {
-            from { transform: scaleX(1) }
-            to { transform: scaleX(0) }
+            from {
+                transform: scaleX(1)
+            }
+
+            to {
+                transform: scaleX(0)
+            }
         }
 
         @media(max-width:480px) {
-            .panel-right { padding: 1.5rem 1rem }
+            .panel-right {
+                padding: 1.5rem 1rem
+            }
+
             #toasts {
                 top: auto;
                 bottom: 1rem;
                 right: .75rem;
                 left: .75rem
             }
+
             .toast {
                 min-width: unset;
                 max-width: 100%
@@ -827,7 +841,9 @@
                         </div>
                         <div class="field-err" id="r-pw-err">Password must be at least 8 characters with uppercase, lowercase, and number.</div>
                         <div class="strength">
-                            <div class="strength-track"><div class="strength-fill" id="s-fill"></div></div>
+                            <div class="strength-track">
+                                <div class="strength-fill" id="s-fill"></div>
+                            </div>
                             <div class="strength-text" id="s-label"></div>
                         </div>
                     </div>
@@ -952,7 +968,9 @@
                         </div>
                         <div class="field-err" id="reset-pw-err">Password must be at least 8 characters with uppercase, lowercase, and number.</div>
                         <div class="strength">
-                            <div class="strength-track"><div class="strength-fill" id="reset-fill"></div></div>
+                            <div class="strength-track">
+                                <div class="strength-fill" id="reset-fill"></div>
+                            </div>
                             <div class="strength-text" id="reset-label"></div>
                         </div>
                     </div>
@@ -1053,7 +1071,7 @@
             const inp = document.getElementById(id);
             const hidden = inp.type === 'password';
             inp.type = hidden ? 'text' : 'password';
-            btn.innerHTML = hidden ? 
+            btn.innerHTML = hidden ?
                 `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>` :
                 `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
         }
@@ -1072,7 +1090,27 @@
             if (/[A-Z]/.test(v)) score++;
             if (/[0-9]/.test(v)) score++;
             if (/[^A-Za-z0-9]/.test(v)) score++;
-            const lvls = [{ w: '20%', c: '#d95f5f', t: 'Weak' },{ w: '40%', c: '#d98c5f', t: 'Fair' },{ w: '60%', c: '#d9c25f', t: 'Good' },{ w: '80%', c: '#8ec25f', t: 'Strong' },{ w: '100%', c: '#52a876', t: 'Excellent' }];
+            const lvls = [{
+                w: '20%',
+                c: '#d95f5f',
+                t: 'Weak'
+            }, {
+                w: '40%',
+                c: '#d98c5f',
+                t: 'Fair'
+            }, {
+                w: '60%',
+                c: '#d9c25f',
+                t: 'Good'
+            }, {
+                w: '80%',
+                c: '#8ec25f',
+                t: 'Strong'
+            }, {
+                w: '100%',
+                c: '#52a876',
+                t: 'Excellent'
+            }];
             const l = lvls[Math.min(score - 1, 4)] || lvls[0];
             fill.style.width = l.w;
             fill.style.background = l.c;
@@ -1094,7 +1132,27 @@
             if (/[A-Z]/.test(v)) score++;
             if (/[0-9]/.test(v)) score++;
             if (/[^A-Za-z0-9]/.test(v)) score++;
-            const lvls = [{ w: '20%', c: '#d95f5f', t: 'Weak' },{ w: '40%', c: '#d98c5f', t: 'Fair' },{ w: '60%', c: '#d9c25f', t: 'Good' },{ w: '80%', c: '#8ec25f', t: 'Strong' },{ w: '100%', c: '#52a876', t: 'Excellent' }];
+            const lvls = [{
+                w: '20%',
+                c: '#d95f5f',
+                t: 'Weak'
+            }, {
+                w: '40%',
+                c: '#d98c5f',
+                t: 'Fair'
+            }, {
+                w: '60%',
+                c: '#d9c25f',
+                t: 'Good'
+            }, {
+                w: '80%',
+                c: '#8ec25f',
+                t: 'Strong'
+            }, {
+                w: '100%',
+                c: '#52a876',
+                t: 'Excellent'
+            }];
             const l = lvls[Math.min(score - 1, 4)] || lvls[0];
             fill.style.width = l.w;
             fill.style.background = l.c;
@@ -1136,7 +1194,7 @@
             if (!ok) return;
 
             setLoading('l-btn', true);
-            
+
             try {
                 const response = await fetch('/login', {
                     method: 'POST',
@@ -1145,7 +1203,10 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ email, password: pw })
+                    body: JSON.stringify({
+                        email,
+                        password: pw
+                    })
                 });
 
                 const result = await response.json();
@@ -1198,7 +1259,7 @@
             if (!ok) return;
 
             setLoading('r-btn', true);
-            
+
             try {
                 const response = await fetch('/register', {
                     method: 'POST',
@@ -1207,7 +1268,12 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ name, email, password: pw, terms: true })
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password: pw,
+                        terms: true
+                    })
                 });
 
                 const result = await response.json();
@@ -1243,7 +1309,7 @@
         async function sendResetCode() {
             clearAllErrors();
             const email = document.getElementById('f-email').value.trim();
-            
+
             if (!isEmail(email)) {
                 showErr('f-email', 'f-email-err');
                 return;
@@ -1251,7 +1317,7 @@
 
             resetEmail = email;
             setLoading('f-btn', true);
-            
+
             try {
                 const response = await fetch('/send-reset-code', {
                     method: 'POST',
@@ -1260,7 +1326,9 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ email })
+                    body: JSON.stringify({
+                        email
+                    })
                 });
 
                 const result = await response.json();
@@ -1283,7 +1351,7 @@
         async function verifyResetCode() {
             clearAllErrors();
             const code = document.getElementById('v-code').value.trim();
-            
+
             if (code.length !== 6) {
                 showErr('v-code', 'v-code-err');
                 return;
@@ -1291,7 +1359,7 @@
 
             resetCode = code;
             setLoading('v-btn', true);
-            
+
             try {
                 const response = await fetch('/verify-reset-code', {
                     method: 'POST',
@@ -1300,7 +1368,10 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ email: resetEmail, code })
+                    body: JSON.stringify({
+                        email: resetEmail,
+                        code
+                    })
                 });
 
                 const result = await response.json();
@@ -1341,7 +1412,7 @@
             if (!ok) return;
 
             setLoading('reset-btn', true);
-            
+
             try {
                 const response = await fetch('/reset-password', {
                     method: 'POST',
@@ -1350,7 +1421,12 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ email: resetEmail, code: resetCode, password, password_confirmation: confirm })
+                    body: JSON.stringify({
+                        email: resetEmail,
+                        code: resetCode,
+                        password,
+                        password_confirmation: confirm
+                    })
                 });
 
                 const result = await response.json();
@@ -1389,7 +1465,9 @@
             requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
             setTimeout(() => {
                 el.classList.add('hide');
-                el.addEventListener('transitionend', () => el.remove(), { once: true });
+                el.addEventListener('transitionend', () => el.remove(), {
+                    once: true
+                });
             }, 3900);
         }
 

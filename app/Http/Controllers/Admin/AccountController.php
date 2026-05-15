@@ -13,47 +13,65 @@ use Illuminate\Support\Facades\Schema;
 
 class AccountController extends Controller
 {
+  /**
+   * INDEX - Ito yung pinaka-main page ng account management
+   * Dito kinukuha yung statistics para ipakita sa dashboard
+   */
   public function index()
   {
-    // Get statistics
+    // Kuha lahat ng total users sa database
     $totalAccounts = User::count();
+
+    // Kuha yung mga users na nag-register sa nakalipas na 30 araw
     $newAccountsThisMonth = User::where('created_at', '>=', now()->subDays(30))->count();
 
-    // Get active sessions (using Laravel's session table if available)
+    // Kuha yung active sessions (mga naka-login ngayon)
     $activeSessions = $this->getActiveSessionsCount();
 
+    // Ibalik yung view ng accounts kasama yung mga statistics
     return view('admin.accounts', compact('totalAccounts', 'newAccountsThisMonth', 'activeSessions'));
   }
 
+  /**
+   * GET USERS - Ito yung nagfa-fetch ng users para sa datatable
+   * Ginagamit to ng AJAX para mag-load ng users kada page
+   */
   public function getUsers(Request $request)
   {
     try {
-      $search = $request->input('search', '');
-      $role = $request->input('role', '');
-      $status = $request->input('status', '');
-      $page = $request->input('page', 1);
-      $perPage = $request->input('per_page', 5);
+      // Kunin yung mga filter galing sa request (search, role, status)
+      $search = $request->input('search', '');      // Search keyword
+      $role = $request->input('role', '');          // Role filter (admin, mod, user)
+      $status = $request->input('status', '');      // Status filter (active, inactive, banned)
+      $page = $request->input('page', 1);           // Current page number
+      $perPage = $request->input('per_page', 5);    // Ilang users per page
 
+      // Gawin yung query para kumuha ng users
       $query = User::query()
-        ->search($search)
-        ->byRole($role)
-        ->byStatus($status);
+        ->search($search)      // Hanapin yung match sa name or email
+        ->byRole($role)        // Filter by role
+        ->byStatus($status);   // Filter by status
 
+      // Bilangin total na users na match sa filters
       $total = $query->count();
-      $users = $query->orderBy('created_at', 'desc')
-        ->skip(($page - 1) * $perPage)
-        ->take($perPage)
+
+      // Kunin yung users para sa current page (may pagination)
+      $users = $query->orderBy('created_at', 'desc')  // Sort by latest
+        ->skip(($page - 1) * $perPage)  // I-skip yung mga nasa previous pages
+        ->take($perPage)                // Kunin lang yung limit per page
         ->get();
 
+      // Ibalik sa JSON para magamit ng JavaScript
       return response()->json([
         'success' => true,
         'data' => $users,
         'total' => $total,
         'page' => $page,
         'per_page' => $perPage,
-        'total_pages' => ceil($total / $perPage)
+        'total_pages' => ceil($total / $perPage)  // Compute total pages
       ]);
     } catch (\Exception $e) {
+      // Pag may error, ibalik yung error message
       return response()->json([
         'success' => false,
         'message' => 'Failed to fetch users: ' . $e->getMessage()
@@ -61,19 +79,23 @@ class AccountController extends Controller
     }
   }
 
+  /**
+   * GET STATISTICS - Kunin lahat ng statistics para sa dashboard
+   * Ginagamit to ng AJAX para mag-auto refresh yung numbers
+   */
   public function getStatistics()
   {
     try {
       $stats = [
-        'total_accounts' => User::count(),
-        'new_this_month' => User::where('created_at', '>=', now()->subDays(30))->count(),
-        'active_sessions' => $this->getActiveSessionsCount(),
-        'admin_count' => User::where('role', 'admin')->count(),
-        'mod_count' => User::where('role', 'mod')->count(),
-        'user_count' => User::where('role', 'user')->count(),
-        'active_users' => User::where('status', 'active')->count(),
-        'inactive_users' => User::where('status', 'inactive')->count(),
-        'banned_users' => User::where('status', 'banned')->count(),
+        'total_accounts' => User::count(),     // Lahat ng users
+        'new_this_month' => User::where('created_at', '>=', now()->subDays(30))->count(), // Bago sa 30 days
+        'active_sessions' => $this->getActiveSessionsCount(), // Active ngayon
+        'admin_count' => User::where('role', 'admin')->count(),   // Bilang ng admin
+        'mod_count' => User::where('role', 'mod')->count(),       // Bilang ng moderator
+        'user_count' => User::where('role', 'user')->count(),     // Bilang ng regular users
+        'active_users' => User::where('status', 'active')->count(),   // Active na accounts
+        'inactive_users' => User::where('status', 'inactive')->count(), // Inactive accounts
+        'banned_users' => User::where('status', 'banned')->count(),     // Banned accounts
       ];
 
       return response()->json([
@@ -88,32 +110,43 @@ class AccountController extends Controller
     }
   }
 
+  /**
+   * GET ACTIVE SESSIONS COUNT - Private method para mabilang active sessions
+   * Dalawang paraan: gamit sessions table or updated_at ng users
+   */
   private function getActiveSessionsCount()
   {
-    // Method 1: Using Laravel's session table (recommended)
+    // Paraan 1: Gamit ang sessions table ng Laravel (mas accurate)
     if (Schema::hasTable('sessions')) {
       return DB::table('sessions')
-        ->where('last_activity', '>=', now()->subMinutes(15)->timestamp)
+        ->where('last_activity', '>=', now()->subMinutes(15)->timestamp) // Active sa last 15 mins
         ->count();
     }
 
-    // Method 2: Fallback - count users who logged in within last 15 minutes
+    // Paraan 2: Backup kung walang sessions table
+    // Bilangin yung mga users na na-update sa last 15 minutes
     return User::where('updated_at', '>=', now()->subMinutes(15))
       ->count();
   }
 
+  /**
+   * STORE - Gumawa ng bagong user
+   * Ito yung tinatawag kapag nag-submit ng add user form
+   */
   public function store(Request $request)
   {
     try {
+      // I-validate muna yung mga input para siguradong tama
       $validator = Validator::make($request->all(), [
-        'first_name' => 'required|string|max:255',
-        'last_name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|string|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/',
-        'role' => 'required|in:admin,mod,user',
-        'status' => 'required|in:active,inactive,banned',
+        'first_name' => 'required|string|max:255',     // Kailangan meron, text lang, max 255 chars
+        'last_name' => 'required|string|max:255',      // Kailangan meron, text lang, max 255 chars
+        'email' => 'required|email|unique:users,email', // Kailangan unique email
+        'password' => 'required|string|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/', // Strong password
+        'role' => 'required|in:admin,mod,user',        // Pwede lang admin, mod, or user
+        'status' => 'required|in:active,inactive,banned', // Pwede lang active, inactive, or banned
       ]);
 
+      // Pag may error sa validation, ibalik agad
       if ($validator->fails()) {
         return response()->json([
           'success' => false,
@@ -121,21 +154,24 @@ class AccountController extends Controller
         ], 422);
       }
 
+      // Gawin yung bagong user sa database
       $user = User::create([
         'first_name' => $request->first_name,
         'last_name' => $request->last_name,
         'email' => $request->email,
-        'password' => Hash::make($request->password),
+        'password' => Hash::make($request->password), // I-hash yung password bago i-save
         'role' => $request->role,
         'status' => $request->status,
       ]);
 
+      // Success! Ibalik yung ginawang user
       return response()->json([
         'success' => true,
         'message' => 'User created successfully',
         'data' => $user
       ]);
     } catch (\Exception $e) {
+      // Pag may error, sabihin kung ano
       return response()->json([
         'success' => false,
         'message' => 'Failed to create user: ' . $e->getMessage()
@@ -143,15 +179,21 @@ class AccountController extends Controller
     }
   }
 
+  /**
+   * UPDATE - Baguhin ang existing user
+   * Ginagamit to kapag nag-edit ng user account
+   */
   public function update(Request $request, $id)
   {
     try {
+      // Hanapin yung user gamit ang ID, pag wala mag-eerror
       $user = User::findOrFail($id);
 
+      // I-validate yung mga bagong values
       $validator = Validator::make($request->all(), [
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $id,
+        'email' => 'required|email|unique:users,email,' . $id, // Pwede same email except sa current user
         'role' => 'required|in:admin,mod,user',
         'status' => 'required|in:active,inactive,banned',
       ]);
@@ -163,12 +205,14 @@ class AccountController extends Controller
         ], 422);
       }
 
+      // I-update yung user sa database
       $user->update([
         'first_name' => $request->first_name,
         'last_name' => $request->last_name,
         'email' => $request->email,
         'role' => $request->role,
         'status' => $request->status,
+        // Hindi na ina-update ang password dito kasi separate form yun
       ]);
 
       return response()->json([
@@ -184,11 +228,16 @@ class AccountController extends Controller
     }
   }
 
+  /**
+   * DESTROY - Burahin ang isang user
+   * Permanenteng tatanggalin ang user sa database
+   */
   public function destroy($id)
   {
     try {
+      // Hanapin yung user, pag wala mag-eerror
       $user = User::findOrFail($id);
-      $user->delete();
+      $user->delete(); // Burahin na
 
       return response()->json([
         'success' => true,
@@ -202,12 +251,17 @@ class AccountController extends Controller
     }
   }
 
+  /**
+   * BULK DELETE - Burahin ang maraming users ng sabay-sabay
+   * Ginagamit to kapag pumili ng multiple users at dinelete
+   */
   public function bulkDelete(Request $request)
   {
     try {
+      // I-validate kung may mga IDs na pinasa at umiiral ba sila
       $validator = Validator::make($request->all(), [
-        'ids' => 'required|array',
-        'ids.*' => 'exists:users,id',
+        'ids' => 'required|array',                    // Kailangan array ng IDs
+        'ids.*' => 'exists:users,id',                // Lahat ng IDs dapat existing
       ]);
 
       if ($validator->fails()) {
@@ -217,11 +271,12 @@ class AccountController extends Controller
         ], 422);
       }
 
+      // Burahin lahat ng users na nasa array ng IDs
       User::whereIn('id', $request->ids)->delete();
 
       return response()->json([
         'success' => true,
-        'message' => count($request->ids) . ' users deleted successfully'
+        'message' => count($request->ids) . ' users deleted successfully' // Ilan ang nabura
       ]);
     } catch (\Exception $e) {
       return response()->json([
