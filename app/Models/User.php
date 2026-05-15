@@ -11,6 +11,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $table = 'users';
+
     protected $fillable = [
         'first_name',
         'last_name',
@@ -18,17 +20,21 @@ class User extends Authenticatable
         'password',
         'role',
         'status',
+        'reset_code',
+        'reset_code_expires_at'
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'reset_code'
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'reset_code_expires_at' => 'datetime',
     ];
 
     // Accessors
@@ -39,7 +45,30 @@ class User extends Authenticatable
 
     public function getJoinedAttribute()
     {
-        return $this->created_at->format('M d, Y');
+        return $this->created_at ? $this->created_at->format('M d, Y') : 'N/A';
+    }
+
+    // Password Reset Methods
+    public function generateResetCode()
+    {
+        // Generate a random 6-digit code
+        $this->reset_code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $this->reset_code_expires_at = now()->addMinutes(15);
+        $this->save();
+
+        return $this->reset_code;
+    }
+
+    public function verifyResetCode($code)
+    {
+        return $this->reset_code === $code && $this->reset_code_expires_at && $this->reset_code_expires_at > now();
+    }
+
+    public function clearResetCode()
+    {
+        $this->reset_code = null;
+        $this->reset_code_expires_at = null;
+        $this->save();
     }
 
     // Scopes
