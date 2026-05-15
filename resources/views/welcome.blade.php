@@ -696,7 +696,6 @@
 
             <div class="brand">
                 <div class="brand-mark">
-                    <!-- Diamond SVG icon -->
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
                         <line x1="12" y1="2" x2="12" y2="22" />
@@ -1039,30 +1038,13 @@
             label.style.color = l.c;
         }
 
-        // ── Validation ───────────────────────────────────────────────────
-        function isEmail(v) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
-        }
-
-        // ── Loading state ────────────────────────────────────────────────
-        function setLoading(id, on) {
-            const b = document.getElementById(id);
-            if (on) {
-                b.disabled = true;
-                b._orig = b.innerHTML;
-                b.innerHTML = `<span class="spinner"></span> Please wait…`
-            } else {
-                b.disabled = false;
-                b.innerHTML = b._orig
-            }
-        }
-
-        // ── LOGIN ────────────────────────────────────────────────────────
+        // ── LOGIN - Redirect to admin/dashboard ──────────────────────────
         function submitLogin() {
             clearAllErrors();
             const email = document.getElementById('l-email').value.trim();
             const pw = document.getElementById('l-pw').value;
             let ok = true;
+
             if (!isEmail(email)) {
                 showErr('l-email', 'l-email-err');
                 ok = false
@@ -1071,17 +1053,22 @@
                 showErr('l-pw', 'l-pw-err');
                 ok = false
             }
+
             if (!ok) return;
+
             setLoading('l-btn', true);
             setTimeout(() => {
                 setLoading('l-btn', false);
-                document.getElementById('l-email').value = '';
-                document.getElementById('l-pw').value = '';
-                toast('success', 'Signed in!', 'Welcome back. You\'re now logged in.');
-            }, 1800);
+                // Redirect to admin dashboard
+                window.location.href = "{{ url('/admin/dashboard') }}";
+            }, 800);
         }
 
-        // ── REGISTER ─────────────────────────────────────────────────────
+        function isEmail(v) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
+        }
+
+        // ── REGISTER - Show success then redirect to login ────────────────
         function submitRegister() {
             clearAllErrors();
             const name = document.getElementById('r-name').value.trim();
@@ -1090,6 +1077,7 @@
             const confirm = document.getElementById('r-confirm').value;
             const terms = document.getElementById('r-terms').checked;
             let ok = true;
+
             if (name.length < 2) {
                 showErr('r-name', 'r-name-err');
                 ok = false
@@ -1110,19 +1098,40 @@
                 document.getElementById('r-terms-err').classList.add('show');
                 ok = false
             }
+
             if (!ok) return;
+
             setLoading('r-btn', true);
             setTimeout(() => {
                 setLoading('r-btn', false);
+                // Clear form
                 ['r-name', 'r-email', 'r-pw', 'r-confirm'].forEach(id => {
                     document.getElementById(id).value = ''
                 });
                 document.getElementById('r-terms').checked = false;
                 document.getElementById('s-fill').style.width = '0%';
                 document.getElementById('s-label').textContent = '';
+
                 toast('success', 'Account created!', `Welcome aboard, ${name}! Your account is ready.`);
-                switchTab('login');
-            }, 2000);
+
+                // Switch to login tab after 1 second
+                setTimeout(() => {
+                    switchTab('login');
+                }, 1000);
+            }, 1500);
+        }
+
+        // ── Loading state ────────────────────────────────────────────────
+        function setLoading(id, on) {
+            const b = document.getElementById(id);
+            if (on) {
+                b.disabled = true;
+                b._orig = b.innerHTML;
+                b.innerHTML = `<span class="spinner"></span> Please wait…`
+            } else {
+                b.disabled = false;
+                b.innerHTML = b._orig
+            }
         }
 
         // ── Toast ─────────────────────────────────────────────────────────

@@ -9,11 +9,15 @@ return [
     | Default Session Driver
     |--------------------------------------------------------------------------
     |
-    | SECURITY: Using 'database' driver provides better session management
-    | and allows us to invalidate specific user sessions when needed
-    | (e.g., password change, account lockout).
+    | This option determines the default session driver that is utilized for
+    | incoming requests. Laravel supports a variety of storage options to
+    | persist session data. Database storage is a great default choice.
+    |
+    | Supported: "file", "cookie", "database", "memcached",
+    |            "redis", "dynamodb", "array"
     |
     */
+
     'driver' => env('SESSION_DRIVER', 'database'),
 
     /*
@@ -21,46 +25,41 @@ return [
     | Session Lifetime
     |--------------------------------------------------------------------------
     |
-    | SECURITY: 120 minutes (2 hours) is a good balance between usability
-    | and security. Shorter sessions reduce the risk of session hijacking.
-    |
-    | For high-security applications, consider reducing to 30-60 minutes.
+    | Here you may specify the number of minutes that you wish the session
+    | to be allowed to remain idle before it expires. If you want them
+    | to expire immediately when the browser is closed then you may
+    | indicate that via the expire_on_close configuration option.
     |
     */
+
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Expire on Close
-    |--------------------------------------------------------------------------
-    |
-    | SECURITY: When set to true, session expires when user closes browser.
-    | This prevents session hijacking on shared/public computers.
-    |
-    | Set to true by default for better security.
-    |
-    */
-    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', true), // Changed to true
+    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
     /*
     |--------------------------------------------------------------------------
     | Session Encryption
     |--------------------------------------------------------------------------
     |
-    | SECURITY: Encrypting session data prevents attackers from reading
-    | session contents even if they gain access to storage (database/files).
-    | 
-    | IMPORTANT: Always enable in production!
+    | This option allows you to easily specify that all of your session data
+    | should be encrypted before it's stored. All encryption is performed
+    | automatically by Laravel and you may use the session like normal.
     |
     */
-    'encrypt' => env('SESSION_ENCRYPT', true), // Changed to true
+
+    'encrypt' => env('SESSION_ENCRYPT', false),
 
     /*
     |--------------------------------------------------------------------------
     | Session File Location
     |--------------------------------------------------------------------------
     |
+    | When utilizing the "file" session driver, the session files are placed
+    | on disk. The default storage location is defined here; however, you
+    | are free to provide another location where they should be stored.
+    |
     */
+
     'files' => storage_path('framework/sessions'),
 
     /*
@@ -68,7 +67,12 @@ return [
     | Session Database Connection
     |--------------------------------------------------------------------------
     |
+    | When using the "database" or "redis" session drivers, you may specify a
+    | connection that should be used to manage these sessions. This should
+    | correspond to a connection in your database configuration options.
+    |
     */
+
     'connection' => env('SESSION_CONNECTION'),
 
     /*
@@ -76,7 +80,12 @@ return [
     | Session Database Table
     |--------------------------------------------------------------------------
     |
+    | When using the "database" session driver, you may specify the table to
+    | be used to store sessions. Of course, a sensible default is defined
+    | for you; however, you're welcome to change this to another table.
+    |
     */
+
     'table' => env('SESSION_TABLE', 'sessions'),
 
     /*
@@ -84,7 +93,14 @@ return [
     | Session Cache Store
     |--------------------------------------------------------------------------
     |
+    | When using one of the framework's cache driven session backends, you may
+    | define the cache store which should be used to store the session data
+    | between requests. This must match one of your defined cache stores.
+    |
+    | Affects: "dynamodb", "memcached", "redis"
+    |
     */
+
     'store' => env('SESSION_STORE'),
 
     /*
@@ -92,7 +108,12 @@ return [
     | Session Sweeping Lottery
     |--------------------------------------------------------------------------
     |
+    | Some session drivers must manually sweep their storage location to get
+    | rid of old sessions from storage. Here are the chances that it will
+    | happen on a given request. By default, the odds are 2 out of 100.
+    |
     */
+
     'lottery' => [2, 100],
 
     /*
@@ -100,13 +121,15 @@ return [
     | Session Cookie Name
     |--------------------------------------------------------------------------
     |
-    | SECURITY: Using a unique, application-specific cookie name prevents
-    | conflicts with other apps on the same domain.
+    | Here you may change the name of the session cookie that is created by
+    | the framework. Typically, you should not need to change this value
+    | since doing so does not grant a meaningful security improvement.
     |
     */
+
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug((string) env('APP_NAME', 'laravel'), '_') . '_session' // Added underscore for security
+        Str::slug((string) env('APP_NAME', 'laravel')).'-session'
     ),
 
     /*
@@ -114,7 +137,12 @@ return [
     | Session Cookie Path
     |--------------------------------------------------------------------------
     |
+    | The session cookie path determines the path for which the cookie will
+    | be regarded as available. Typically, this will be the root path of
+    | your application, but you're free to change this when necessary.
+    |
     */
+
     'path' => env('SESSION_PATH', '/'),
 
     /*
@@ -122,36 +150,38 @@ return [
     | Session Cookie Domain
     |--------------------------------------------------------------------------
     |
-    | SECURITY: Explicitly set to null to only allow current domain.
-    | Never use wildcard domains unless absolutely necessary.
+    | This value determines the domain and subdomains the session cookie is
+    | available to. By default, the cookie will be available to the root
+    | domain without subdomains. Typically, this shouldn't be changed.
     |
     */
-    'domain' => env('SESSION_DOMAIN', null), // Explicitly set to null
+
+    'domain' => env('SESSION_DOMAIN'),
 
     /*
     |--------------------------------------------------------------------------
     | HTTPS Only Cookies
     |--------------------------------------------------------------------------
     |
-    | SECURITY: When true, cookies are only sent over HTTPS connections.
-    | This prevents session hijacking through network sniffing (MITM attacks).
-    |
-    | MUST be true in production when using HTTPS!
+    | By setting this option to true, session cookies will only be sent back
+    | to the server if the browser has a HTTPS connection. This will keep
+    | the cookie from being sent to you when it can't be done securely.
     |
     */
-    'secure' => env('SESSION_SECURE_COOKIE', true), // Changed to true for production
+
+    'secure' => env('SESSION_SECURE_COOKIE'),
 
     /*
     |--------------------------------------------------------------------------
     | HTTP Access Only
     |--------------------------------------------------------------------------
     |
-    | SECURITY: When true, JavaScript cannot access the cookie.
-    | This prevents XSS attacks from stealing session cookies.
-    |
-    | ALWAYS keep this true!
+    | Setting this value to true will prevent JavaScript from accessing the
+    | value of the cookie and the cookie will only be accessible through
+    | the HTTP protocol. It's unlikely you should disable this option.
     |
     */
+
     'http_only' => env('SESSION_HTTP_ONLY', true),
 
     /*
@@ -159,12 +189,16 @@ return [
     | Same-Site Cookies
     |--------------------------------------------------------------------------
     |
-    | SECURITY: 'lax' allows same-site navigation while preventing CSRF attacks.
-    | 'strict' is more secure but may break some legitimate cross-site requests.
-    | 
-    | 'lax' is the best balance for most applications.
+    | This option determines how your cookies behave when cross-site requests
+    | take place, and can be used to mitigate CSRF attacks. By default, we
+    | will set this value to "lax" to permit secure cross-site requests.
+    |
+    | See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#samesitesamesite-value
+    |
+    | Supported: "lax", "strict", "none", null
     |
     */
+
     'same_site' => env('SESSION_SAME_SITE', 'lax'),
 
     /*
@@ -172,7 +206,12 @@ return [
     | Partitioned Cookies
     |--------------------------------------------------------------------------
     |
+    | Setting this value to true will tie the cookie to the top-level site for
+    | a cross-site context. Partitioned cookies are accepted by the browser
+    | when flagged "secure" and the Same-Site attribute is set to "none".
+    |
     */
+
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
 
 ];
