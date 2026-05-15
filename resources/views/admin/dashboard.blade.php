@@ -444,7 +444,7 @@
         <div class="page-subtitle">Welcome back — here's what's happening.</div>
     </div>
     <div class="page-actions">
-        <button class="btn btn-ghost" onclick="showToast('info','Refreshed','Dashboard data updated.')">
+        <button class="btn btn-ghost" onclick="refreshDashboard()">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10" />
                 <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
@@ -462,7 +462,6 @@
 </div>
 
 <div class="stats-grid">
-
     <div class="stat-card blue">
         <div class="stat-card-top">
             <span class="stat-label">Total Accounts</span>
@@ -475,7 +474,7 @@
                 </svg>
             </span>
         </div>
-        <div class="stat-number blue">{{ number_format($registeredAccounts ?? 0) }}</div>
+        <div class="stat-number blue" id="totalAccounts">{{ number_format($totalAccounts ?? 0) }}</div>
         <div class="stat-desc">Registered users in the system</div>
         <div class="stat-badge up">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -497,7 +496,7 @@
                 </svg>
             </span>
         </div>
-        <div class="stat-number green">{{ number_format($newAccountsThisMonth ?? 0) }}</div>
+        <div class="stat-number green" id="newThisMonth">{{ number_format($newAccountsThisMonth ?? 0) }}</div>
         <div class="stat-desc">Registered in the last 30 days</div>
         <div class="stat-badge up">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -517,7 +516,7 @@
                 </svg>
             </span>
         </div>
-        <div class="stat-number purple">{{ number_format($activeSessions ?? 0) }}</div>
+        <div class="stat-number purple" id="activeSessions">{{ number_format($activeSessions ?? 0) }}</div>
         <div class="stat-desc">Currently logged-in users</div>
         <div class="stat-badge up">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -526,7 +525,6 @@
             Live now
         </div>
     </div>
-
 </div>
 
 <div class="section-header">
@@ -537,6 +535,7 @@
         Quick Actions
     </div>
 </div>
+
 <div class="quick-grid">
     <a href="{{ route('admin.accounts') }}" class="quick-card">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -556,7 +555,7 @@
         <span>Search Users</span>
         <small>Find an account</small>
     </a>
-    <a href="{{ route('admin.settings') }}" class="quick-card">
+    <a href="#" class="quick-card" onclick="showToast('info', 'Settings', 'System configuration page coming soon.', 3000)">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -564,7 +563,7 @@
         <span>Settings</span>
         <small>System configuration</small>
     </a>
-    <div class="quick-card" onclick="showToast('success','Export Started','Report will be ready shortly.')">
+    <div class="quick-card" onclick="exportReport()">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
@@ -582,8 +581,7 @@
         </svg>
         Recent Activity
     </div>
-    <button class="btn btn-ghost" style="padding:6px 12px; font-size:0.76rem;"
-        onclick="showToast('info','Activity Log','Full activity log coming soon.')">
+    <button class="btn btn-ghost" style="padding:6px 12px; font-size:0.76rem;" onclick="showToast('info', 'Activity Log', 'Full activity log coming soon.', 3000)">
         View all
     </button>
 </div>
@@ -598,20 +596,7 @@
                 <th>Date</th>
             </tr>
         </thead>
-        <tbody>
-            @if(isset($recentActivity) && count($recentActivity) > 0)
-            @foreach($recentActivity as $item)
-            <tr>
-                <td style="color: var(--text);">{{ $item->activity ?? '—' }}</td>
-                <td>{{ $item->user ?? '—' }}</td>
-                <td>
-                    <span class="status-dot {{ $item->status === 'active' ? 'active' : ($item->status === 'pending' ? 'pending' : 'inactive') }}"></span>
-                    {{ ucfirst($item->status ?? 'unknown') }}
-                </td>
-                <td>{{ $item->created_at ?? '—' }}</td>
-            </tr>
-            @endforeach
-            @else
+        <tbody id="activityTableBody">
             <tr>
                 <td colspan="4">
                     <div class="empty-state">
@@ -626,18 +611,169 @@
                     </div>
                 </td>
             </tr>
-            @endif
         </tbody>
     </table>
 </div>
 
 <script>
+    // Toast notification function
+    function showToast(title, message, type = 'success', duration = 5000) {
+        let container = document.getElementById('toastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            container.id = 'toastContainer';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+
+        const icons = {
+            success: '<i class="fas fa-check-circle" style="color: var(--success);"></i>',
+            error: '<i class="fas fa-exclamation-circle" style="color: var(--danger);"></i>',
+            warning: '<i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>',
+            info: '<i class="fas fa-info-circle" style="color: var(--info);"></i>'
+        };
+
+        toast.innerHTML = `
+            <div class="toast-icon">${icons[type] || icons.success}</div>
+            <div class="toast-content">
+                <div class="toast-title">${escapeHtml(title)}</div>
+                <div class="toast-message">${escapeHtml(message)}</div>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentElement) toast.remove();
+        }, duration);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // Format number with commas
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Update statistics via AJAX
+    async function updateStatistics() {
+        try {
+            const response = await fetch('/admin/dashboard/statistics', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('totalAccounts').textContent = formatNumber(result.data.total_accounts);
+                document.getElementById('newThisMonth').textContent = formatNumber(result.data.new_this_month);
+                document.getElementById('activeSessions').textContent = formatNumber(result.data.active_sessions);
+            }
+        } catch (error) {
+            console.error('Error updating statistics:', error);
+        }
+    }
+
+    // Load recent activity
+    async function loadRecentActivity() {
+        try {
+            const response = await fetch('/admin/dashboard/activity', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data.length > 0) {
+                renderActivity(result.data);
+            }
+        } catch (error) {
+            console.error('Error loading activity:', error);
+        }
+    }
+
+    function renderActivity(activities) {
+        const tbody = document.getElementById('activityTableBody');
+
+        tbody.innerHTML = activities.map(activity => `
+            <tr>
+                <td style="color: var(--text);">${escapeHtml(activity.activity || '—')}</td>
+                <td>${escapeHtml(activity.user || '—')}</td>
+                <td>
+                    <span class="status-dot ${activity.status === 'active' ? 'active' : (activity.status === 'pending' ? 'pending' : 'inactive')}"></span>
+                    ${escapeHtml(activity.status ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1) : 'Unknown')}
+                </td>
+                <td>${escapeHtml(activity.created_at || '—')}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Refresh dashboard
+    async function refreshDashboard() {
+        showToast('info', 'Refreshing', 'Dashboard data is being updated...', 2000);
+        await updateStatistics();
+        await loadRecentActivity();
+        setTimeout(() => {
+            showToast('success', 'Refreshed', 'Dashboard data updated successfully.', 3000);
+        }, 500);
+    }
+
+    // Export report
+    async function exportReport() {
+        showToast('info', 'Export Started', 'Generating report...', 2000);
+
+        try {
+            const response = await fetch('/admin/dashboard/export', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showToast('success', 'Export Ready', 'Report will be downloaded shortly.', 3000);
+                // Trigger download
+                window.location.href = result.download_url;
+            } else {
+                showToast('error', 'Export Failed', result.message, 3000);
+            }
+        } catch (error) {
+            console.error('Error exporting report:', error);
+            showToast('error', 'Export Failed', 'Unable to generate report.', 3000);
+        }
+    }
+
+    // Initialize dashboard
     window.addEventListener('DOMContentLoaded', () => {
+        loadRecentActivity();
+
         const shown = sessionStorage.getItem('gh_welcome');
         if (!shown) {
             setTimeout(() => showToast('success', 'Welcome back!', 'GuenHub Admin Panel loaded successfully.', 5000), 600);
             sessionStorage.setItem('gh_welcome', '1');
         }
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            updateStatistics();
+            loadRecentActivity();
+        }, 300000);
     });
 </script>
 

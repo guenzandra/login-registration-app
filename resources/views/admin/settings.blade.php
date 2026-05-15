@@ -316,6 +316,7 @@
       transform: translateY(-20px);
       opacity: 0;
     }
+
     to {
       transform: translateY(0);
       opacity: 1;
@@ -424,19 +425,19 @@
       <!-- Edit Form -->
       <form action="#" method="POST" id="settingsForm" class="space-y-4">
         @csrf
-        
+
         <div class="form-group">
           <label for="full_name">
             <i class="fas fa-user"></i>
             Full Name
           </label>
-          <input type="text" 
-                 name="full_name" 
-                 id="full_name" 
-                 class="form-input" 
-                 placeholder="Enter your full name"
-                 value="John Doe"
-                 disabled>
+          <input type="text"
+            name="full_name"
+            id="full_name"
+            class="form-input"
+            placeholder="Enter your full name"
+            value="John Doe"
+            disabled>
         </div>
 
         <div class="form-group">
@@ -444,13 +445,13 @@
             <i class="fas fa-envelope"></i>
             Email Address
           </label>
-          <input type="email" 
-                 name="email" 
-                 id="email" 
-                 class="form-input" 
-                 placeholder="Enter your email"
-                 value="john.doe@example.com"
-                 disabled>
+          <input type="email"
+            name="email"
+            id="email"
+            class="form-input"
+            placeholder="Enter your email"
+            value="john.doe@example.com"
+            disabled>
         </div>
 
         <div class="form-group">
@@ -458,12 +459,12 @@
             <i class="fas fa-lock"></i>
             Password
           </label>
-          <input type="password" 
-                 name="password" 
-                 id="password" 
-                 class="form-input" 
-                 placeholder="Enter new password (leave blank to keep current)"
-                 disabled>
+          <input type="password"
+            name="password"
+            id="password"
+            class="form-input"
+            placeholder="Enter new password (leave blank to keep current)"
+            disabled>
           <div class="password-hint">
             <i class="fas fa-info-circle"></i>
             Password must be at least 8 characters long
@@ -506,7 +507,9 @@
     email: 'john.doe@example.com'
   };
 
-  let currentData = {...originalData};
+  let currentData = {
+    ...originalData
+  };
   let isEditMode = false;
 
   // DOM Elements
@@ -538,7 +541,7 @@
 
   function toggleEditMode(enable) {
     isEditMode = enable;
-    
+
     if (enable) {
       fullNameInput.disabled = false;
       emailInput.disabled = false;
@@ -548,7 +551,7 @@
       cancelBtn.style.display = 'inline-flex';
       resetBtn.style.display = 'inline-flex';
       editModeIndicator.style.display = 'inline-flex';
-      
+
       // Set focus on first field
       fullNameInput.focus();
     } else {
@@ -625,7 +628,7 @@
       container = document.createElement('div');
       container.className = 'toast-container';
       document.body.appendChild(container);
-      
+
       // Add styles for toast container
       const style = document.createElement('style');
       style.textContent = `
@@ -665,7 +668,7 @@
       `;
       document.head.appendChild(style);
     }
-    
+
     container = document.querySelector('.toast-container');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -711,28 +714,28 @@
 
   settingsForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     showLoading();
-    
+
     // Simulate API call
     setTimeout(() => {
       const newData = {
         full_name: fullNameInput.value.trim(),
         email: emailInput.value.trim()
       };
-      
+
       currentData = newData;
       updateDisplay();
-      
+
       toggleEditMode(false);
       hideLoading();
       showSuccessMessage();
       showToast('Success', 'Your profile has been updated successfully!', 'success');
-      
+
       // Clear password field
       passwordInput.value = '';
     }, 1000);
@@ -740,7 +743,7 @@
 
   // Initialize
   updateDisplay();
-  
+
   // Add keyboard shortcut (Ctrl+E to edit)
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'e') {

@@ -42,7 +42,7 @@
 
   <div class="nav-group-label" style="margin-top:14px;">System</div>
 
-  <a href="{{ route('admin.settings') }}" class="nav-link">
+  <!-- <a href="{{ route('admin.settings') }}" class="nav-link">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"
       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="3" />
@@ -55,7 +55,7 @@
                h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
     Settings
-  </a>
+  </a> -->
 
 </nav>
 

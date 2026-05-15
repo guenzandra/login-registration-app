@@ -191,9 +191,13 @@
     color: var(--text-primary);
   }
 
+  .accounts-table tbody tr {
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
   .accounts-table tbody tr:hover {
     background: var(--bg-hover);
-    transition: background 0.3s;
   }
 
   /* Table Loading Overlay */
@@ -318,77 +322,6 @@
   .status-banned .status-dot {
     background: var(--danger);
     box-shadow: 0 0 5px var(--danger);
-  }
-
-  .action-dropdown {
-    position: relative;
-    display: inline-block;
-  }
-
-  .dropdown-trigger {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: var(--radius);
-    transition: background 0.3s;
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-  }
-
-  .dropdown-trigger:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-  }
-
-  .dropdown-menu {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
-    min-width: 150px;
-    z-index: 1000;
-    display: none;
-  }
-
-  .dropdown-menu.show {
-    display: block;
-    animation: fadeIn 0.2s;
-  }
-
-  .dropdown-menu ul {
-    list-style: none;
-  }
-
-  .dropdown-menu li {
-    padding: 0.625rem 1rem;
-    cursor: pointer;
-    transition: background 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-primary);
-  }
-
-  .dropdown-menu li i {
-    width: 18px;
-    color: var(--text-secondary);
-  }
-
-  .dropdown-menu li:hover {
-    background: var(--bg-hover);
-  }
-
-  .dropdown-menu .text-danger {
-    color: var(--danger);
-  }
-
-  .dropdown-menu .text-danger i {
-    color: var(--danger);
   }
 
   .pagination {
@@ -682,6 +615,7 @@
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
+    align-items: center;
   }
 
   .view-field:last-child {
@@ -695,6 +629,19 @@
 
   .view-value {
     color: var(--text-primary);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .action-buttons .btn {
+    flex: 1;
+    justify-content: center;
   }
 
   @keyframes fadeIn {
@@ -791,6 +738,10 @@
       min-width: auto;
       width: calc(100vw - 2rem);
     }
+
+    .action-buttons {
+      flex-direction: column;
+    }
   }
 
   @media (max-width: 640px) {
@@ -813,7 +764,7 @@
 <div class="accounts-container">
   <div class="page-header">
     <h1><i class="fas fa-users" style="margin-right: 0.75rem; color: var(--primary);"></i> Account Management</h1>
-    <p>Manage user accounts, roles, and permissions here.</p>
+    <p>Manage user accounts, roles, and permissions here. Click on any row to view details.</p>
   </div>
 
   <div class="toolbar">
@@ -842,7 +793,7 @@
 
   <div class="table-card" id="tableCard">
     <div style="position: relative;">
-      <div id="tableLoadingOverlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 10; border-radius: var(--radius);">
+      <div id="tableLoadingOverlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 10; border-radius: var(--radius);">
         <div class="table-spinner"></div>
       </div>
       <table class="accounts-table">
@@ -852,17 +803,16 @@
             <th>Email</th>
             <th>Role</th>
             <th>Status</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="tableBody">
           <tr>
-            <td colspan="5" style="text-align: center; padding: 3rem;">
+            <td colspan="4" style="text-align: center; padding: 3rem;">
               <div class="table-spinner"></div>
             </td>
           </tr>
         </tbody>
-        </>
+      </table>
     </div>
 
     <div class="pagination">
@@ -1002,10 +952,17 @@
     </div>
     <div class="modal-body">
       <div id="viewContent"></div>
+      <div class="action-buttons">
+        <button class="btn btn-primary" id="viewEditBtn">
+          <i class="fas fa-edit"></i> Edit User
+        </button>
+        <button class="btn btn-danger" id="viewDeleteBtn">
+          <i class="fas fa-trash-alt"></i> Delete User
+        </button>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('viewModal')">Close</button>
-      <button class="btn btn-primary" id="viewEditBtn"><i class="fas fa-edit"></i> Edit User</button>
     </div>
   </div>
 </div>
@@ -1035,6 +992,7 @@
   let currentPage = 1;
   let totalPages = 1;
   let isLoading = false;
+  let currentViewUserId = null;
   let deleteUserId = null;
 
   // Initialize
@@ -1124,12 +1082,12 @@
     const tbody = document.getElementById('tableBody');
 
     if (!users || users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-secondary);"><i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>No users found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 3rem; color: var(--text-secondary);"><i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>No users found</td></tr>';
       return;
     }
 
     tbody.innerHTML = users.map(user => `
-      <tr>
+      <tr onclick="viewUser(${user.id})" style="cursor: pointer;">
         <td>
           <div class="user-info">
             <div class="user-avatar">${getInitials(user.first_name, user.last_name)}</div>
@@ -1142,24 +1100,6 @@
         <td>${escapeHtml(user.email)}</td>
         <td>${getRoleBadge(user.role)}</td>
         <td>${getStatusBadge(user.status)}</td>
-        <td>
-          <div class="action-dropdown">
-            <button class="dropdown-trigger" onclick="toggleDropdown(${user.id}, event)"><i class="fas fa-ellipsis-v"></i></button>
-            <div class="dropdown-menu" id="dropdown-${user.id}">
-              <ul>
-                <li onclick="viewUser(${user.id})">
-                  <i class="fas fa-eye"></i> View Details
-                </li>
-                <li onclick="openEditModal(${user.id})">
-                  <i class="fas fa-edit"></i> Edit
-                </li>
-                <li onclick="openDeleteModal(${user.id})" class="text-danger">
-                  <i class="fas fa-trash-alt"></i> Delete
-                </li>
-              </ul>
-            </div>
-          </div>
-        </td>
       </tr>
     `).join('');
   }
@@ -1295,6 +1235,7 @@
       if (result.success) {
         showToast('Success', result.message, 'success');
         closeModal('editModal');
+        closeModal('viewModal');
         await loadUsers();
         return true;
       } else {
@@ -1332,6 +1273,7 @@
       if (result.success) {
         showToast('Success', result.message, 'success');
         closeModal('deleteModal');
+        closeModal('viewModal');
         await loadUsers();
         return true;
       } else {
@@ -1409,6 +1351,7 @@
   });
 
   async function viewUser(id) {
+    currentViewUserId = id;
     showTableLoading();
 
     try {
@@ -1451,9 +1394,18 @@
           </div>
         `;
 
-        document.getElementById('viewEditBtn').onclick = () => {
+        // Setup edit button
+        const editBtn = document.getElementById('viewEditBtn');
+        editBtn.onclick = () => {
           closeModal('viewModal');
           openEditModal(id);
+        };
+
+        // Setup delete button
+        const deleteBtn = document.getElementById('viewDeleteBtn');
+        deleteBtn.onclick = () => {
+          closeModal('viewModal');
+          openDeleteModal(id);
         };
 
         openModal('viewModal');
@@ -1491,9 +1443,9 @@
 
   function getStatusBadge(status) {
     const statuses = {
-      active: '<span class="status status-active"><span class="status-dot"></span><i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.25rem;"></i> Active</span>',
-      inactive: '<span class="status status-inactive"><span class="status-dot"></span><i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.25rem;"></i> Inactive</span>',
-      banned: '<span class="status status-banned"><span class="status-dot"></span><i class="fas fa-ban" style="margin-right: 0.25rem;"></i> Banned</span>'
+      active: '<span class="status status-active"><i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.25rem;"></i> Active</span>',
+      inactive: '<span class="status status-inactive"><i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.25rem;"></i> Inactive</span>',
+      banned: '<span class="status status-banned"><i class="fas fa-ban" style="margin-right: 0.25rem;"></i> Banned</span>'
     };
     return statuses[status] || statuses.active;
   }
@@ -1546,14 +1498,6 @@
     if (modal) {
       modal.classList.remove('show');
       document.body.style.overflow = '';
-    }
-  }
-
-  function toggleDropdown(id, event) {
-    event.stopPropagation();
-    const dropdown = document.getElementById(`dropdown-${id}`);
-    if (dropdown) {
-      dropdown.classList.toggle('show');
     }
   }
 
@@ -1622,12 +1566,6 @@
       closeModal(event.target.id);
     }
   };
-
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.dropdown-menu.show').forEach(dropdown => {
-      dropdown.classList.remove('show');
-    });
-  });
 </script>
 
 @push('scripts')
