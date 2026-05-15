@@ -355,7 +355,7 @@
 
     .quick-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 12px;
         margin-bottom: 24px;
     }
@@ -429,7 +429,7 @@
         }
 
         .quick-grid {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr;
         }
 
         .table-card {
@@ -552,26 +552,9 @@
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
-        <span>Search Users</span>
-        <small>Find an account</small>
+        <span>Manage Users</span>
+        <small>View and manage all users</small>
     </a>
-    <a href="#" class="quick-card" onclick="showToast('info', 'Settings', 'System configuration page coming soon.', 3000)">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-        </svg>
-        <span>Settings</span>
-        <small>System configuration</small>
-    </a>
-    <div class="quick-card" onclick="exportReport()">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        <span>Export</span>
-        <small>Download report</small>
-    </div>
 </div>
 
 <div class="section-header">
@@ -581,8 +564,8 @@
         </svg>
         Recent Activity
     </div>
-    <button class="btn btn-ghost" style="padding:6px 12px; font-size:0.76rem;" onclick="showToast('info', 'Activity Log', 'Full activity log coming soon.', 3000)">
-        View all
+    <button class="btn btn-ghost" style="padding:6px 12px; font-size:0.76rem;" onclick="loadRecentActivity()">
+        Refresh
     </button>
 </div>
 
@@ -607,7 +590,7 @@
                             </svg>
                         </div>
                         <div class="empty-title">No activity yet</div>
-                        <div class="empty-desc">Recent activity from users and system events will appear here.</div>
+                        <div class="empty-desc">Recent activity from users will appear here.</div>
                     </div>
                 </td>
             </tr>
@@ -700,6 +683,23 @@
 
             if (result.success && result.data.length > 0) {
                 renderActivity(result.data);
+            } else {
+                document.getElementById('activityTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="3" />
+                                        <path d="M9 9h6M9 13h4" />
+                                    </svg>
+                                </div>
+                                <div class="empty-title">No activity yet</div>
+                                <div class="empty-desc">Recent activity from users will appear here.</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             }
         } catch (error) {
             console.error('Error loading activity:', error);
@@ -730,33 +730,6 @@
         setTimeout(() => {
             showToast('success', 'Refreshed', 'Dashboard data updated successfully.', 3000);
         }, 500);
-    }
-
-    // Export report
-    async function exportReport() {
-        showToast('info', 'Export Started', 'Generating report...', 2000);
-
-        try {
-            const response = await fetch('/admin/dashboard/export', {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                showToast('success', 'Export Ready', 'Report will be downloaded shortly.', 3000);
-                // Trigger download
-                window.location.href = result.download_url;
-            } else {
-                showToast('error', 'Export Failed', result.message, 3000);
-            }
-        } catch (error) {
-            console.error('Error exporting report:', error);
-            showToast('error', 'Export Failed', 'Unable to generate report.', 3000);
-        }
     }
 
     // Initialize dashboard
